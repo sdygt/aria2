@@ -321,7 +321,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   {
     OptionHandler* op(
         new ParameterOptionHandler(PREF_FILE_ALLOCATION, TEXT_FILE_ALLOCATION,
-                                   V_PREALLOC, {V_NONE, V_PREALLOC, V_TRUNC,
+                                   V_FALLOC, {V_NONE, V_PREALLOC, V_TRUNC,
 #ifdef HAVE_SOME_FALLOCATE
                                                 V_FALLOC
 #endif // HAVE_SOME_FALLOCATE
@@ -440,7 +440,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   {
     OptionHandler* op(new NumberOptionHandler(PREF_MAX_CONNECTION_PER_SERVER,
                                               TEXT_MAX_CONNECTION_PER_SERVER,
-                                              "1", 1, 16, 'x'));
+                                              "1", 1, 1024, 'x'));
     op->addTag(TAG_BASIC);
     op->addTag(TAG_FTP);
     op->addTag(TAG_HTTP);
