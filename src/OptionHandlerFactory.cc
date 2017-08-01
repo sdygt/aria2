@@ -321,12 +321,17 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   {
     OptionHandler* op(
         new ParameterOptionHandler(PREF_FILE_ALLOCATION, TEXT_FILE_ALLOCATION,
-                                   V_FALLOC, {V_NONE, V_PREALLOC, V_TRUNC,
 #ifdef HAVE_SOME_FALLOCATE
-                                                V_FALLOC
+			V_FALLOC
+#else
+			V_PREALLOC
 #endif // HAVE_SOME_FALLOCATE
-                                               },
-                                   'a'));
+			, { V_NONE, V_PREALLOC, V_TRUNC,
+#ifdef HAVE_SOME_FALLOCATE
+         V_FALLOC
+#endif // HAVE_SOME_FALLOCATE
+        },
+        'a'));
     op->addTag(TAG_BASIC);
     op->addTag(TAG_FILE);
     op->setInitialOption(true);
@@ -440,7 +445,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   {
     OptionHandler* op(new NumberOptionHandler(PREF_MAX_CONNECTION_PER_SERVER,
                                               TEXT_MAX_CONNECTION_PER_SERVER,
-                                              "1", 1, 1024, 'x'));
+                                              "1", 1, 4096, 'x'));
     op->addTag(TAG_BASIC);
     op->addTag(TAG_FTP);
     op->addTag(TAG_HTTP);
@@ -501,7 +506,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   }
   {
     OptionHandler* op(new UnitNumberOptionHandler(
-        PREF_MIN_SPLIT_SIZE, TEXT_MIN_SPLIT_SIZE, "20M", 1_m, 1_g, 'k'));
+        PREF_MIN_SPLIT_SIZE, TEXT_MIN_SPLIT_SIZE, "20M", 256_k, 1_g, 'k'));
     op->addTag(TAG_BASIC);
     op->addTag(TAG_FTP);
     op->addTag(TAG_HTTP);
@@ -1528,6 +1533,16 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
+    OptionHandler* op(new BooleanOptionHandler(
+        PREF_BT_LOAD_SAVED_METADATA, TEXT_BT_LOAD_SAVED_METADATA, A2_V_FALSE,
+        OptionHandler::OPT_ARG));
+    op->addTag(TAG_BITTORRENT);
+    op->setInitialOption(true);
+    op->setChangeGlobalOption(true);
+    op->setChangeOptionForReserved(true);
+    handlers.push_back(op);
+  }
+  {
     OptionHandler* op(new DefaultOptionHandler(
         PREF_BT_LPD_INTERFACE, TEXT_BT_LPD_INTERFACE, NO_DEFAULT_VALUE,
         "interface, IP address", OptionHandler::REQ_ARG));
@@ -1840,6 +1855,12 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     snprintf(prefix, sizeof(prefix), "A2-%d-%d-%d-", major, minor, micro);
     OptionHandler* op(new DefaultOptionHandler(PREF_PEER_ID_PREFIX,
                                                TEXT_PEER_ID_PREFIX, prefix));
+    op->addTag(TAG_BITTORRENT);
+    handlers.push_back(op);
+  }
+  {
+    OptionHandler* op(new DefaultOptionHandler(
+        PREF_PEER_AGENT, TEXT_PEER_AGENT, "aria2/" PACKAGE_VERSION));
     op->addTag(TAG_BITTORRENT);
     handlers.push_back(op);
   }
